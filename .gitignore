@@ -1,0 +1,57 @@
+# Dependencies
+node_modules/
+server/node_modules/
+client/node_modules/
+
+# Environment Variables & Secrets
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+server/.env
+
+# Build & Dist Outputs
+client/dist/
+client/build/
+dist/
+build/
+
+# Uploaded Files (Resumes & Logos)
+server/uploads/*
+!server/uploads/.gitkeep
+
+# Logs & Diagnostics
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Operating System Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE & Editor Settings
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# Temporary & Python Build Scripts
+build_*.py
+fix_*.py
+scan_*.py
+create_*.py
+gen_*.py
+update_*.py
+__pycache__/
+*.pyc
