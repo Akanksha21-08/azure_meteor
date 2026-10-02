@@ -22,4 +22,25 @@ const jobSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now }
 });
 
+// Full-text compound index for high-speed indexed search across key fields
+jobSchema.index(
+  {
+    jobTitle: 'text',
+    description: 'text',
+    requiredSkills: 'text',
+    companyName: 'text',
+    location: 'text'
+  },
+  {
+    weights: {
+      jobTitle: 10,
+      requiredSkills: 6,
+      companyName: 4,
+      location: 3,
+      description: 1
+    },
+    name: 'JobTextSearchIndex'
+  }
+);
+
 module.exports = mongoose.model('Job', jobSchema);

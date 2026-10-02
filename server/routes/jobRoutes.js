@@ -4,10 +4,13 @@ const { getPublicJobs, getJobById, createJob, updateJob, deleteJob, toggleJobSta
 const { protect } = require('../middleware/authMiddleware');
 const { authorize } = require('../middleware/roleMiddleware');
 
+const validate = require('../middleware/validateMiddleware');
+const { createJobSchema } = require('../validators/jobValidator');
+
 router.get('/', getPublicJobs);
 router.get('/my-jobs', protect, authorize('recruiter'), getMyJobs);
 router.get('/:id', getJobById);
-router.post('/', protect, authorize('recruiter'), createJob);
+router.post('/', protect, authorize('recruiter'), validate(createJobSchema), createJob);
 router.put('/:id', protect, authorize('recruiter'), updateJob);
 router.delete('/:id', protect, authorize('recruiter'), deleteJob);
 router.patch('/:id/status', protect, authorize('recruiter'), toggleJobStatus);

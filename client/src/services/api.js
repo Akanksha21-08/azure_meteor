@@ -1,7 +1,12 @@
 import axios from 'axios';
 
+const apiBase = import.meta.env.VITE_API_URL 
+  ? `${import.meta.env.VITE_API_URL.replace(/\/$/, '')}/api`
+  : '/api';
+
 const API = axios.create({
-  baseURL: '/api',
+  baseURL: apiBase,
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json'
   }
@@ -10,9 +15,13 @@ const API = axios.create({
 API.interceptors.request.use((config) => {
   const user = localStorage.getItem('userInfo');
   if (user) {
-    const parsedUser = JSON.parse(user);
-    if (parsedUser.token) {
-      config.headers.Authorization = 'Bearer ' + parsedUser.token;
+    try {
+      const parsedUser = JSON.parse(user);
+      if (parsedUser.token) {
+        config.headers.Authorization = 'Bearer ' + parsedUser.token;
+      }
+    } catch {
+      // Ignore parse error
     }
   }
   return config;

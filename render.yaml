@@ -1,0 +1,30 @@
+services:
+  # Backend REST API Web Service on Render
+  - type: web
+    name: jobverse-api
+    env: node
+    plan: free
+    rootDir: server
+    buildCommand: npm install
+    startCommand: node server.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      - key: MONGODB_URI
+        value: mongodb+srv://<username>:<password>@cluster0.abcde.mongodb.net/jobportal?retryWrites=true&w=majority
+      - key: JWT_SECRET
+        value: super_secret_jwt_key_job_portal_2026_safe
+      - key: JWT_REFRESH_SECRET
+        value: super_secret_jwt_refresh_key_job_portal_2026_safe
+      - key: CLIENT_URL
+        value: https://your-frontend-app.vercel.app
+      # Cloudinary Storage Credentials
+      - key: CLOUDINARY_CLOUD_NAME
+        value: your_dummy_cloud_name
+      - key: CLOUDINARY_API_KEY
+        value: your_dummy_api_key
+      - key: CLOUDINARY_API_SECRET
+        value: your_dummy_api_secret

@@ -61,7 +61,9 @@ const uploadCompanyLogo = async (req, res) => {
       return res.status(400).json({ message: 'Please select an image file for logo' });
     }
 
-    const logoUrl = '/uploads/' + req.file.filename;
+    const logoUrl = req.file.path && req.file.path.startsWith('http')
+      ? req.file.path
+      : '/uploads/' + req.file.filename;
     let profile = await RecruiterProfile.findOne({ user: req.user._id });
     if (!profile) {
       profile = new RecruiterProfile({ user: req.user._id, companyName: 'Company' });

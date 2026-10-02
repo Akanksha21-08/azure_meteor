@@ -16,8 +16,14 @@ export const login = async (credentials) => {
   return response.data;
 };
 
-export const logout = () => {
-  localStorage.removeItem('userInfo');
+export const logout = async () => {
+  try {
+    await API.post('/auth/logout');
+  } catch (err) {
+    // Continue local cleanup even if network fails
+  } finally {
+    localStorage.removeItem('userInfo');
+  }
 };
 
 export const getMe = async () => {
