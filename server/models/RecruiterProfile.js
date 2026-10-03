@@ -16,6 +16,13 @@ const recruiterProfileSchema = new mongoose.Schema({
     twitter: { type: String, default: '' },
     facebook: { type: String, default: '' }
   },
+  verificationStatus: { 
+    type: String, 
+    enum: ['pending', 'verified', 'rejected', 'suspended'], 
+    default: 'pending' 
+  },
+  verificationNotes: { type: String, default: '' },
+  verifiedAt: { type: Date },
   updatedAt: { type: Date, default: Date.now }
 });
 
