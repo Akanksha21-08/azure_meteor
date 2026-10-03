@@ -1,0 +1,15 @@
+{
+  "name": "azure-meteor-workspace",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Job Portal Monorepo Workspace",
+  "scripts": {
+    "dev": "npm run dev --prefix client",
+    "client": "npm run dev --prefix client",
+    "server": "npm run dev --prefix server",
+    "start": "npm run dev --prefix server",
+    "build": "npm run build --prefix client",
+    "seed": "npm run seed --prefix server",
+    "install:all": "npm install --prefix client && npm install --prefix server"
+  }
+}
