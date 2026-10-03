@@ -14,6 +14,7 @@ const applicationRoutes = require('./routes/applicationRoutes');
 const savedJobRoutes = require('./routes/savedJobRoutes');
 const interviewRoutes = require('./routes/interviewRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 
 const app = express();
 
@@ -66,6 +67,7 @@ app.use('/api/applications', applicationRoutes);
 app.use('/api/saved-jobs', savedJobRoutes);
 app.use('/api/interviews', interviewRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Health check endpoint for deployment monitoring (Render, UptimeRobot, etc.)
 app.get('/api/health', (req, res) => {

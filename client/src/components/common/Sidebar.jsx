@@ -3,11 +3,12 @@ import { Link, useLocation } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
 import { 
   LayoutDashboard, User, Briefcase, FileCheck, Bookmark, 
-  Calendar, Bell, Key, PlusCircle, Building, Users 
+  Calendar, Bell, Key, PlusCircle, Building, Users,
+  ShieldAlert, Building2, Flag
 } from 'lucide-react';
 
 const Sidebar = () => {
-  const { user, isCandidate, isRecruiter } = useContext(AuthContext);
+  const { user, isCandidate, isRecruiter, isAdmin } = useContext(AuthContext);
   const location = useLocation();
 
   const candidateLinks = [
@@ -30,7 +31,15 @@ const Sidebar = () => {
     { label: 'Change Password', path: '/recruiter/change-password', icon: Key },
   ];
 
-  const links = isCandidate ? candidateLinks : recruiterLinks;
+  const adminLinks = [
+    { label: 'Control Center', path: '/admin/dashboard', icon: ShieldAlert },
+    { label: 'Users', path: '/admin/users', icon: Users },
+    { label: 'Companies', path: '/admin/companies', icon: Building2 },
+    { label: 'Jobs', path: '/admin/jobs', icon: Briefcase },
+    { label: 'Reports', path: '/admin/reports', icon: Flag },
+  ];
+
+  const links = isAdmin ? adminLinks : isCandidate ? candidateLinks : recruiterLinks;
 
   return (
     <aside className="sidebar">

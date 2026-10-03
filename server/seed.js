@@ -10,6 +10,7 @@ const Application = require('./models/Application');
 const SavedJob = require('./models/SavedJob');
 const Interview = require('./models/Interview');
 const Notification = require('./models/Notification');
+const Report = require('./models/Report');
 
 const seedDB = async () => {
   try {
@@ -26,6 +27,7 @@ const seedDB = async () => {
     await SavedJob.deleteMany({});
     await Interview.deleteMany({});
     await Notification.deleteMany({});
+    await Report.deleteMany({});
 
     console.log('Cleared existing data.');
 
@@ -40,6 +42,8 @@ const seedDB = async () => {
     const recruiterProfile = await RecruiterProfile.create({
       user: recruiterUser._id,
       companyName: 'TechCorp Innovations',
+      verificationStatus: 'verified',
+      verifiedAt: new Date(),
       companyDescription: 'TechCorp Innovations is a global cloud software company powering next-gen enterprise solutions.',
       industry: 'Information Technology',
       companySize: '100-500',
@@ -231,10 +235,66 @@ const seedDB = async () => {
       read: false
     });
 
+    // 8. Create Admin User
+    const adminUser = await User.create({
+      name: 'Executive Admin',
+      email: 'admin@example.com',
+      password: 'password123',
+      role: 'admin'
+    });
+
+    // 9. Create Suspicious Recruiter for moderation testing
+    const scamRecruiter = await User.create({
+      name: 'Mark Shady',
+      email: 'scam_recruiter@example.com',
+      password: 'password123',
+      role: 'recruiter'
+    });
+
+    const scamProfile = await RecruiterProfile.create({
+      user: scamRecruiter._id,
+      companyName: 'Crypto Fast Wealth Inc.',
+      companyDescription: 'Earn massive returns with zero effort typing test data.',
+      industry: 'Finance',
+      location: 'Unverified Location',
+      verificationStatus: 'pending',
+      verificationNotes: 'Pending identity check'
+    });
+
+    const scamJob = await Job.create({
+      recruiter: scamRecruiter._id,
+      companyName: scamProfile.companyName,
+      jobTitle: 'Data Entry Assistant - $5,000 Weekly Guaranteed',
+      description: 'Urgent hiring! Simple data entry typing captchas. Must pay $50 processing fee upfront before receiving instructions.',
+      requiredSkills: ['Data Entry', 'Typing'],
+      experienceRequired: '0 years',
+      salaryMin: 200000,
+      salaryMax: 260000,
+      salaryPeriod: 'Yearly',
+      location: 'Remote',
+      jobType: 'Full Time',
+      workMode: 'Remote',
+      status: 'flagged',
+      moderationNotes: 'Reported by candidate: Potential advance-fee scam'
+    });
+
+    // 10. Create Sample Report
+    await Report.create({
+      reporter: candidateUser._id,
+      targetType: 'job',
+      targetId: scamJob._id,
+      targetTitle: scamJob.jobTitle,
+      reason: 'scam_fraud',
+      details: 'This listing asks candidates to pay an upfront fee of $50 via Telegram before sending employment papers.',
+      status: 'pending'
+    });
+
     console.log('Seed completed successfully!');
     console.log('--- TEST ACCOUNTS ---');
-    console.log('Candidate Account: candidate@example.com / password123');
+    console.log('Admin Account:     admin@example.com / password123');
     console.log('Recruiter Account: recruiter@example.com / password123');
+    console.log('Candidate Account: candidate@example.com / password123');
+    console.log('Flagged Recruiter: scam_recruiter@example.com / password123');
 
     process.exit(0);
   } catch (error) {
