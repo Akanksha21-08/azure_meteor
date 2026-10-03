@@ -3,10 +3,12 @@ import { useParams } from 'react-router-dom';
 import { DragDropContext } from '@hello-pangea/dnd';
 import * as applicationService from '../../services/applicationService';
 import * as interviewService from '../../services/interviewService';
+import * as jobService from '../../services/jobService';
 import KanbanColumn from '../../components/recruiter/KanbanColumn';
 import InterviewModal from '../../components/recruiter/InterviewModal';
 import Loader from '../../components/common/Loader';
-import { LayoutGrid, List, Users, CheckCircle2, Clock, Calendar } from 'lucide-react';
+import ResumeViewerModal from '../../components/common/ResumeViewerModal';
+import { LayoutGrid, List, Users, CheckCircle2, Clock, Calendar, Briefcase, FileText } from 'lucide-react';
 
 // --- Pipeline column order ---
 const PIPELINE_COLUMNS = [
@@ -69,12 +71,16 @@ const ApplicantsList = () => {
   const [applications, setApplications] = useState([]);
   const [columns, setColumns] = useState(buildColumns([]));
   const [loading, setLoading] = useState(true);
+  const [jobInfo, setJobInfo] = useState(null);
   const [viewMode, setViewMode] = useState('kanban'); // 'kanban' | 'list'
   const [isUpdating, setIsUpdating] = useState(false);
 
   // Interview modal
   const [selectedApp, setSelectedApp] = useState(null);
   const [isInterviewModalOpen, setIsInterviewModalOpen] = useState(false);
+
+  // Resume viewer modal
+  const [viewerResume, setViewerResume] = useState(null);
 
   // Toast
   const [toast, setToast] = useState(null);
@@ -96,6 +102,13 @@ const ApplicantsList = () => {
   }, [jobId]);
 
   useEffect(() => { fetchApplicants(); }, [fetchApplicants]);
+
+  // Fetch job info for the page header
+  useEffect(() => {
+    jobService.getJobById(jobId)
+      .then((data) => setJobInfo(data))
+      .catch(() => { });
+  }, [jobId]);
 
   // ---- Kanban drag end handler ----
   const onDragEnd = async (result) => {
@@ -168,6 +181,12 @@ const ApplicantsList = () => {
       {/* ---- Page Header ---- */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.75rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.3rem' }}>
+            <Briefcase size={16} style={{ color: '#c084fc' }} />
+            <span style={{ fontSize: '0.82rem', color: '#c084fc', fontWeight: 600 }}>
+              {jobInfo ? (jobInfo.jobTitle + (jobInfo.companyName ? ' \u2014 ' + jobInfo.companyName : '')) : '...'}
+            </span>
+          </div>
           <h1 style={{ fontSize: '1.9rem', fontWeight: 800 }}>Applicant Pipeline</h1>
           <p style={{ color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
             Drag & drop candidates across stages — updates instantly.
@@ -237,26 +256,34 @@ const ApplicantsList = () => {
 
       {/* ---- Kanban Board View ---- */}
       {viewMode === 'kanban' && (
-        <div style={{ overflowX: 'auto', paddingBottom: '2rem' }}>
-          <DragDropContext onDragEnd={onDragEnd}>
-            <div style={{
-              display: 'flex',
-              gap: '1rem',
-              minWidth: 'max-content',
-              alignItems: 'flex-start',
-              paddingBottom: '0.5rem',
-            }}>
-              {PIPELINE_COLUMNS.map((col) => (
-                <KanbanColumn
-                  key={col}
-                  columnId={col}
-                  applications={columns[col] || []}
-                  onScheduleInterview={handleOpenInterview}
-                />
-              ))}
-            </div>
-          </DragDropContext>
-        </div>
+        applications.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '4rem 2rem' }}>
+            <div style={{ fontSize: '3rem', marginBottom: '1rem', opacity: 0.4 }}>📋</div>
+            <h3 style={{ color: 'var(--text-secondary)', fontWeight: 700, marginBottom: '0.5rem' }}>No applicants yet</h3>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem' }}>Candidates who apply for this role will appear here.</p>
+          </div>
+        ) : (
+          <div style={{ overflowX: 'auto', paddingBottom: '2rem' }}>
+            <DragDropContext onDragEnd={onDragEnd}>
+              <div style={{
+                display: 'flex',
+                gap: '1rem',
+                minWidth: 'max-content',
+                alignItems: 'flex-start',
+                paddingBottom: '0.5rem',
+              }}>
+                {PIPELINE_COLUMNS.map((col) => (
+                  <KanbanColumn
+                    key={col}
+                    columnId={col}
+                    applications={columns[col] || []}
+                    onScheduleInterview={handleOpenInterview}
+                  />
+                ))}
+              </div>
+            </DragDropContext>
+          </div>
+        )
       )}
 
       {/* ---- List View (original flat list, preserved) ---- */}
@@ -308,10 +335,14 @@ const ApplicantsList = () => {
                         </td>
                         <td>
                           {app.resumeUrl ? (
-                            <a href={app.resumeUrl} target="_blank" rel="noopener noreferrer"
-                              className="btn btn-outline btn-sm" style={{ fontSize: '0.78rem' }}>
-                              View PDF
-                            </a>
+                            <button
+                              type="button"
+                              onClick={() => setViewerResume({ url: app.resumeUrl, candidateName: app.candidate?.name })}
+                              className="btn btn-outline btn-sm"
+                              style={{ fontSize: '0.78rem', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
+                            >
+                              <FileText size={13} color="#3b82f6" /> View PDF
+                            </button>
                           ) : (
                             <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>—</span>
                           )}
@@ -342,6 +373,16 @@ const ApplicantsList = () => {
           onClose={() => setIsInterviewModalOpen(false)}
           application={selectedApp}
           onSubmit={handleScheduleInterviewSubmit}
+        />
+      )}
+
+      {/* Resume Viewer Modal */}
+      {viewerResume && (
+        <ResumeViewerModal
+          isOpen={!!viewerResume}
+          onClose={() => setViewerResume(null)}
+          resumeUrl={viewerResume.url}
+          candidateName={viewerResume.candidateName}
         />
       )}
 
