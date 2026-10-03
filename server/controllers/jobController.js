@@ -20,13 +20,10 @@ const getPublicJobs = async (req, res) => {
 
     const query = { status: 'active' };
 
-    if (search) {
-      query.$or = [
-        { jobTitle: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } },
-        { companyName: { $regex: search, $options: 'i' } },
-        { requiredSkills: { $in: [new RegExp(search, 'i')] } }
-      ];
+    let isTextSearch = false;
+    if (search && search.trim()) {
+      query.$text = { $search: search.trim() };
+      isTextSearch = true;
     }
 
     if (title) {
@@ -66,17 +63,43 @@ const getPublicJobs = async (req, res) => {
     if (sort === 'oldest') sortOptions = { createdAt: 1 };
     if (sort === 'salary-high') sortOptions = { salaryMax: -1 };
     if (sort === 'salary-low') sortOptions = { salaryMin: 1 };
+    if (sort === 'relevance' && isTextSearch) sortOptions = { score: { $meta: 'textScore' } };
 
     const pageNum = parseInt(page, 10);
     const limitNum = parseInt(limit, 10);
     const skip = (pageNum - 1) * limitNum;
 
-    const total = await Job.countDocuments(query);
-    const jobs = await Job.find(query)
-      .sort(sortOptions)
-      .skip(skip)
-      .limit(limitNum)
-      .populate('recruiter', 'name email avatar');
+    let total = 0;
+    let jobs = [];
+
+    try {
+      total = await Job.countDocuments(query);
+      const projection = isTextSearch ? { score: { $meta: 'textScore' } } : {};
+      jobs = await Job.find(query, projection)
+        .sort(sortOptions)
+        .skip(skip)
+        .limit(limitNum)
+        .populate('recruiter', 'name email avatar');
+    } catch (err) {
+      // Fallback to regex if $text indexing is pending or query contains special chars
+      if (isTextSearch) {
+        delete query.$text;
+        query.$or = [
+          { jobTitle: { $regex: search, $options: 'i' } },
+          { description: { $regex: search, $options: 'i' } },
+          { companyName: { $regex: search, $options: 'i' } },
+          { requiredSkills: { $in: [new RegExp(search, 'i')] } }
+        ];
+        total = await Job.countDocuments(query);
+        jobs = await Job.find(query)
+          .sort(sortOptions === 'relevance' ? { createdAt: -1 } : sortOptions)
+          .skip(skip)
+          .limit(limitNum)
+          .populate('recruiter', 'name email avatar');
+      } else {
+        throw err;
+      }
+    }
 
     res.json({
       jobs,

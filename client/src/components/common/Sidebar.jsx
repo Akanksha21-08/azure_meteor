@@ -56,7 +56,7 @@ const Sidebar = () => {
             <li key={link.path}>
               <Link 
                 to={link.path} 
-                className={sidebar-link  }
+                className={`sidebar-link ${isActive ? 'active' : ''}`}
               >
                 <Icon size={18} />
                 <span>{link.label}</span>

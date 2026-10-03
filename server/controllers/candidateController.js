@@ -82,7 +82,10 @@ const uploadResume = async (req, res) => {
       return res.status(400).json({ message: 'Please select a resume file to upload' });
     }
 
-    const fileUrl = /uploads/;
+    const fileUrl = req.file.path && req.file.path.startsWith('http') 
+      ? req.file.path 
+      : '/uploads/' + req.file.filename;
+
     let profile = await CandidateProfile.findOne({ user: req.user._id });
     if (!profile) {
       profile = new CandidateProfile({ user: req.user._id });
@@ -111,7 +114,10 @@ const uploadPhoto = async (req, res) => {
       return res.status(400).json({ message: 'Please select an image file to upload' });
     }
 
-    const photoUrl = /uploads/;
+    const photoUrl = req.file.path && req.file.path.startsWith('http') 
+      ? req.file.path 
+      : '/uploads/' + req.file.filename;
+
     await User.findByIdAndUpdate(req.user._id, { avatar: photoUrl });
     let profile = await CandidateProfile.findOne({ user: req.user._id });
     if (profile) {
