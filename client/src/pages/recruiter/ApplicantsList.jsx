@@ -5,6 +5,7 @@ import * as applicationService from '../../services/applicationService';
 import * as interviewService from '../../services/interviewService';
 import KanbanColumn from '../../components/recruiter/KanbanColumn';
 import InterviewModal from '../../components/recruiter/InterviewModal';
+import ChatWindow from '../../components/chat/ChatWindow';
 import Loader from '../../components/common/Loader';
 import { LayoutGrid, List, Users, CheckCircle2, Clock, Calendar } from 'lucide-react';
 
@@ -76,6 +77,9 @@ const ApplicantsList = () => {
   const [selectedApp, setSelectedApp] = useState(null);
   const [isInterviewModalOpen, setIsInterviewModalOpen] = useState(false);
 
+  // Chat window
+  const [chatApp, setChatApp] = useState(null);
+
   // Toast
   const [toast, setToast] = useState(null);
 
@@ -142,6 +146,10 @@ const ApplicantsList = () => {
   const handleOpenInterview = (app) => {
     setSelectedApp(app);
     setIsInterviewModalOpen(true);
+  };
+
+  const handleOpenChat = (app) => {
+    setChatApp(app);
   };
 
   const handleScheduleInterviewSubmit = async (interviewData) => {
@@ -252,6 +260,7 @@ const ApplicantsList = () => {
                   columnId={col}
                   applications={columns[col] || []}
                   onScheduleInterview={handleOpenInterview}
+                  onMessage={handleOpenChat}
                 />
               ))}
             </div>
@@ -359,6 +368,17 @@ const ApplicantsList = () => {
           50%       { opacity: 0.5; }
         }
       `}</style>
+
+      {/* Floating Chat Window */}
+      {chatApp && (
+        <ChatWindow
+          peer={chatApp.candidate}
+          jobTitle={chatApp.job?.jobTitle || ''}
+          relatedJob={chatApp.job?._id || chatApp.job}
+          relatedApplication={chatApp._id}
+          onClose={() => setChatApp(null)}
+        />
+      )}
     </div>
   );
 };

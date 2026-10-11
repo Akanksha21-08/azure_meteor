@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Draggable } from '@hello-pangea/dnd';
-import { FileText, Calendar, Mail, ChevronDown, ChevronUp, ExternalLink } from 'lucide-react';
+import { FileText, Calendar, Mail, ChevronDown, ChevronUp, MessageSquare } from 'lucide-react';
 
 const COLUMN_COLORS = {
   'Applied':              { border: '#3b82f6', glow: 'rgba(59,130,246,0.12)',  text: '#60a5fa' },
@@ -11,7 +11,7 @@ const COLUMN_COLORS = {
   'Rejected':             { border: '#ef4444', glow: 'rgba(239,68,68,0.12)',  text: '#f87171' },
 };
 
-const KanbanCard = ({ application, index, onScheduleInterview }) => {
+const KanbanCard = ({ application, index, onScheduleInterview, onMessage }) => {
   const [expanded, setExpanded] = useState(false);
   const { _id, candidate, resumeUrl, coverLetter, status, appliedAt } = application;
   const colors = COLUMN_COLORS[status] || COLUMN_COLORS['Applied'];
@@ -145,6 +145,20 @@ const KanbanCard = ({ application, index, onScheduleInterview }) => {
             >
               <Calendar size={11} /> Interview
             </button>
+            {onMessage && (
+              <button
+                onClick={(e) => { e.stopPropagation(); onMessage(application); }}
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: '0.3rem',
+                  padding: '0.3rem 0.65rem', borderRadius: '6px', fontSize: '0.75rem',
+                  fontWeight: 600, background: 'rgba(6,182,212,0.15)', color: '#22d3ee',
+                  border: '1px solid rgba(6,182,212,0.25)', cursor: 'pointer',
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                <MessageSquare size={11} /> Message
+              </button>
+            )}
           </div>
         </div>
       )}

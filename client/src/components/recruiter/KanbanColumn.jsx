@@ -41,7 +41,7 @@ const COLUMN_CONFIG = {
   },
 };
 
-const KanbanColumn = ({ columnId, applications, onScheduleInterview }) => {
+const KanbanColumn = ({ columnId, applications, onScheduleInterview, onMessage }) => {
   const config = COLUMN_CONFIG[columnId] || COLUMN_CONFIG['Applied'];
   const count = applications.length;
 
@@ -128,6 +128,7 @@ const KanbanColumn = ({ columnId, applications, onScheduleInterview }) => {
                 application={app}
                 index={index}
                 onScheduleInterview={onScheduleInterview}
+                onMessage={onMessage}
               />
             ))}
 
