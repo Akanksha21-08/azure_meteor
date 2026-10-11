@@ -14,6 +14,8 @@ const Application = require('./models/Application');
 const SavedJob = require('./models/SavedJob');
 const Interview = require('./models/Interview');
 const Notification = require('./models/Notification');
+const Report = require('./models/Report');
+const Message = require('./models/Message');
 
 const rand = (arr) => arr[Math.floor(Math.random() * arr.length)];
 const daysAgo = (n) => new Date(Date.now() - n * 86400000);
@@ -42,8 +44,15 @@ const seedDB = async () => {
       User.deleteMany({}), CandidateProfile.deleteMany({}), RecruiterProfile.deleteMany({}),
       Job.deleteMany({}), Application.deleteMany({}), SavedJob.deleteMany({}),
       Interview.deleteMany({}), Notification.deleteMany({}),
+      Report.deleteMany({}), Message.deleteMany({}),
     ]);
     console.log('🗑️  Cleared existing data.\n');
+
+    // ════════════════════════════════
+    // ADMIN USER
+    // ════════════════════════════════
+    await User.create({ name: 'Admin', email: 'admin@example.com', password: 'password123', role: 'admin' });
+    console.log('✅ Created admin user: admin@example.com / password123');
 
     // ════════════════════════════════
     // RECRUITERS
@@ -324,12 +333,13 @@ const seedDB = async () => {
     console.log(`  Interviews   : ${iCount}`);
     console.log(`  Notifications: ${nCount}`);
     console.log('\n🔑  TEST ACCOUNTS');
-    console.log('  ┌────────────────────────────────────────────────┐');
-    console.log('  │ RECRUITER  recruiter@example.com / password123 │');
-    console.log('  │ RECRUITER  james@nexacloud.com   / password123 │');
-    console.log('  │ RECRUITER  priya@aiwave.io       / password123 │');
-    console.log('  │ CANDIDATE  candidate@example.com / password123 │');
-    console.log('  └────────────────────────────────────────────────┘\n');
+    console.log('  ┌──────────────────────────────────────────────────┐');
+    console.log('  │ ADMIN      admin@example.com     / password123   │');
+    console.log('  │ RECRUITER  recruiter@example.com / password123   │');
+    console.log('  │ RECRUITER  james@nexacloud.com   / password123   │');
+    console.log('  │ RECRUITER  priya@aiwave.io       / password123   │');
+    console.log('  │ CANDIDATE  candidate@example.com / password123   │');
+    console.log('  └──────────────────────────────────────────────────┘\n');
 
     process.exit(0);
   } catch (err) {
