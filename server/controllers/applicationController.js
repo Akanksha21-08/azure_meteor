@@ -3,6 +3,19 @@ const Job = require('../models/Job');
 const CandidateProfile = require('../models/CandidateProfile');
 const Notification = require('../models/Notification');
 
+const getStatusTitle = (status) => {
+  const map = {
+    'Under Review':        '🔍 Your application is Under Review',
+    'Shortlisted':         '⭐ You\'ve been Shortlisted!',
+    'Interview Scheduled': '📅 Interview Scheduled',
+    'Selected':            '🎉 Congratulations! You\'ve been Selected',
+    'Rejected':            'Application Update',
+  };
+  return map[status] || 'Application Status Updated';
+};
+
+
+
 const applyJob = async (req, res) => {
   try {
     const { jobId } = req.params;
@@ -39,7 +52,7 @@ const applyJob = async (req, res) => {
       statusHistory: [{ status: 'Applied', updatedAt: Date.now() }]
     });
 
-    await Notification.create({
+    const appNotif = await Notification.create({
       recipient: job.recruiter,
       sender: req.user._id,
       type: 'application_submitted',
@@ -48,6 +61,12 @@ const applyJob = async (req, res) => {
       relatedJob: jobId,
       relatedApplication: application._id
     });
+
+    // Real-time push to recruiter
+    const io = req.app.get('io');
+    if (io) {
+      io.to(`user:${job.recruiter}`).emit('notification:new', appNotif);
+    }
 
     res.status(201).json(application);
   } catch (error) {
@@ -144,15 +163,26 @@ const updateApplicationStatus = async (req, res) => {
     application.statusHistory.push({ status, updatedAt: Date.now() });
     await application.save();
 
-    await Notification.create({
+    const statusNotif = await Notification.create({
       recipient: application.candidate,
       sender: req.user._id,
       type: 'status_updated',
-      title: 'Application Status Updated',
-      message: 'Your application status for "' + application.job.jobTitle + '" was updated to "' + status + '"',
+      title: getStatusTitle(status),
+      message: 'Your application for "' + application.job.jobTitle + '" has moved to ' + status + '.',
       relatedJob: application.job._id,
       relatedApplication: application._id
     });
+
+    // Real-time push to candidate
+    const io = req.app.get('io');
+    if (io) {
+      io.to(`user:${application.candidate}`).emit('notification:new', statusNotif);
+      io.to(`user:${application.candidate}`).emit('application:status_changed', {
+        applicationId: application._id,
+        newStatus: status,
+        jobTitle: application.job.jobTitle,
+      });
+    }
 
     res.json(application);
   } catch (error) {
