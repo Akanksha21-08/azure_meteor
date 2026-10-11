@@ -16,8 +16,8 @@ const jobSchema = new mongoose.Schema({
   workMode: { type: String, enum: ['Remote', 'Hybrid', 'Onsite'], required: true },
   educationRequirement: { type: String, default: 'Bachelor Degree' },
   openings: { type: Number, default: 1 },
-  deadline: { type: Date },
-  status: { type: String, enum: ['active', 'closed'], default: 'active' },
+  status: { type: String, enum: ['active', 'closed', 'flagged', 'rejected', 'pending_review'], default: 'active' },
+  moderationNotes: { type: String, default: '' },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 });

@@ -23,6 +23,11 @@ const protect = async (req, res, next) => {
     if (!req.user) {
       return res.status(401).json({ message: 'Not authorized, user not found' });
     }
+    if (req.user.isSuspended) {
+      return res.status(403).json({ 
+        message: 'Account suspended: ' + (req.user.suspensionReason || 'Access restricted by administrator.') 
+      });
+    }
     return next();
   } catch (error) {
     console.error('Auth verification error:', error.message);

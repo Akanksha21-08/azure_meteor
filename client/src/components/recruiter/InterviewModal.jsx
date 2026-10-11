@@ -1,15 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Modal from '../common/Modal';
 
+const EMPTY_FORM = {
+  date: '',
+  time: '',
+  mode: 'Online',
+  meetingLink: '',
+  location: '',
+  notes: '',
+};
+
 const InterviewModal = ({ isOpen, onClose, application, onSubmit }) => {
-  const [formData, setFormData] = useState({
-    date: '',
-    time: '',
-    mode: 'Online',
-    meetingLink: '',
-    location: '',
-    notes: ''
-  });
+  const [formData, setFormData] = useState(EMPTY_FORM);
+
+  // Reset form whenever the modal opens for a new candidate
+  useEffect(() => {
+    if (isOpen) {
+      setFormData(EMPTY_FORM);
+    }
+  }, [isOpen, application?._id]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });

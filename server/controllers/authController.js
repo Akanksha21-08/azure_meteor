@@ -77,6 +77,12 @@ const loginUser = async (req, res) => {
 
     const user = await User.findOne({ email }).select('+password');
     if (user && (await user.matchPassword(password))) {
+      if (user.isSuspended) {
+        return res.status(403).json({ 
+          message: 'Account suspended: ' + (user.suspensionReason || 'Access has been revoked by platform administrator.') 
+        });
+      }
+
       const token = generateToken(user._id);
       const refreshToken = generateRefreshToken(user._id);
 

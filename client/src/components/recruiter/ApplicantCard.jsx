@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import StatusBadge from '../common/StatusBadge';
+import ResumeViewerModal from '../common/ResumeViewerModal';
 import { User, FileText, Calendar, Mail, Phone, ExternalLink } from 'lucide-react';
 
 const ApplicantCard = ({ application, onStatusChange, onScheduleInterview }) => {
+  const [isResumeOpen, setIsResumeOpen] = useState(false);
   const { _id, candidate, resumeUrl, coverLetter, status, appliedAt } = application;
 
   return (
@@ -24,10 +26,10 @@ const ApplicantCard = ({ application, onStatusChange, onScheduleInterview }) => 
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <StatusBadge status={status} />
-          
-          <select 
-            className="form-control" 
-            value={status} 
+
+          <select
+            className="form-control"
+            value={status}
             onChange={(e) => onStatusChange(_id, e.target.value)}
             style={{ width: 'auto', padding: '0.35rem 2rem 0.35rem 0.75rem', fontSize: '0.85rem' }}
           >
@@ -51,9 +53,14 @@ const ApplicantCard = ({ application, onStatusChange, onScheduleInterview }) => 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', paddingTop: '0.75rem', borderTop: '1px solid var(--border-color)' }}>
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
           {resumeUrl ? (
-            <a href={resumeUrl} target="_blank" rel="noopener noreferrer" className="btn btn-outline btn-sm">
+            <button
+              type="button"
+              onClick={() => setIsResumeOpen(true)}
+              className="btn btn-outline btn-sm"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+            >
               <FileText size={15} color="#3b82f6" /> View Resume
-            </a>
+            </button>
           ) : (
             <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>No resume attached</span>
           )}
@@ -66,6 +73,15 @@ const ApplicantCard = ({ application, onStatusChange, onScheduleInterview }) => 
           <Calendar size={15} /> Schedule Interview
         </button>
       </div>
+
+      {resumeUrl && (
+        <ResumeViewerModal
+          isOpen={isResumeOpen}
+          onClose={() => setIsResumeOpen(false)}
+          resumeUrl={resumeUrl}
+          candidateName={candidate?.name}
+        />
+      )}
     </div>
   );
 };

@@ -15,7 +15,10 @@ const Login = () => {
     setError('');
     const result = await loginUser(email, password);
     if (result.success) {
-      if (result.user.role === 'candidate') {
+      const role = result.user.role;
+      if (role === 'admin') {
+        navigate('/admin/dashboard');
+      } else if (role === 'candidate') {
         navigate('/candidate/dashboard');
       } else {
         navigate('/recruiter/dashboard');
@@ -32,6 +35,11 @@ const Login = () => {
 
   const fillRecruiterCredentials = () => {
     setEmail('recruiter@example.com');
+    setPassword('password123');
+  };
+
+  const fillAdminCredentials = () => {
+    setEmail('admin@example.com');
     setPassword('password123');
   };
 
@@ -84,12 +92,15 @@ const Login = () => {
           <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.75rem' }}>
             Demo Instant Credentials (From Seed Data):
           </span>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
             <button type="button" onClick={fillCandidateCredentials} className="btn btn-outline btn-sm" style={{ flex: 1, fontSize: '0.78rem' }}>
               Candidate Demo
             </button>
             <button type="button" onClick={fillRecruiterCredentials} className="btn btn-outline btn-sm" style={{ flex: 1, fontSize: '0.78rem' }}>
               Recruiter Demo
+            </button>
+            <button type="button" onClick={fillAdminCredentials} className="btn btn-outline btn-sm" style={{ flex: 1, fontSize: '0.78rem', color: '#f87171', borderColor: '#f87171' }}>
+              Admin Demo
             </button>
           </div>
         </div>

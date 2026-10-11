@@ -62,7 +62,8 @@ const getInterviews = async (req, res) => {
       .sort({ createdAt: -1 })
       .populate('job', 'jobTitle companyName companyLogo location')
       .populate('candidate', 'name email avatar')
-      .populate('recruiter', 'name email avatar');
+      .populate('recruiter', 'name email avatar')
+      .populate('application', 'resumeUrl coverLetter');
 
     res.json(interviews);
   } catch (error) {
@@ -72,7 +73,9 @@ const getInterviews = async (req, res) => {
 
 const updateInterview = async (req, res) => {
   try {
-    const interview = await Interview.findById(req.params.id);
+    const interview = await Interview.findById(req.params.id)
+      .populate('job', 'jobTitle')
+      .populate('candidate', 'name');
     if (!interview) {
       return res.status(404).json({ message: 'Interview not found' });
     }
@@ -81,7 +84,29 @@ const updateInterview = async (req, res) => {
       return res.status(403).json({ message: 'Not authorized to update this interview' });
     }
 
-    const updated = await Interview.findByIdAndUpdate(req.params.id, { ...req.body, updatedAt: Date.now() }, { new: true });
+    const updated = await Interview.findByIdAndUpdate(
+      req.params.id,
+      { ...req.body, updatedAt: Date.now() },
+      { new: true }
+    );
+
+    // Notify the candidate if status has changed to Completed or Cancelled
+    const newStatus = req.body.status;
+    if (newStatus && ['Completed', 'Cancelled'].includes(newStatus) && newStatus !== interview.status) {
+      const msgMap = {
+        Completed: `Your interview for "${interview.job?.jobTitle}" has been marked as Completed.`,
+        Cancelled:  `Your interview for "${interview.job?.jobTitle}" has been cancelled. The recruiter will reach out soon.`,
+      };
+      await Notification.create({
+        recipient: interview.candidate,
+        sender: req.user._id,
+        type: 'interview_updated',
+        title: `Interview ${newStatus}`,
+        message: msgMap[newStatus],
+        relatedJob: interview.job?._id,
+      });
+    }
+
     res.json(updated);
   } catch (error) {
     res.status(500).json({ message: error.message });

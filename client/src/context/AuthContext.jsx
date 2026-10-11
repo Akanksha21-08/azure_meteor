@@ -65,7 +65,8 @@ export const AuthProvider = ({ children }) => {
       updateUserState,
       isAuthenticated: !!user,
       isCandidate: user?.role === 'candidate',
-      isRecruiter: user?.role === 'recruiter'
+      isRecruiter: user?.role === 'recruiter',
+      isAdmin: user?.role === 'admin'
     }}>
       {children}
     </AuthContext.Provider>

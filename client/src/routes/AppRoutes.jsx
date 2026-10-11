@@ -35,6 +35,13 @@ import RecruiterInterviews from '../pages/recruiter/RecruiterInterviews';
 import RecruiterNotifications from '../pages/recruiter/RecruiterNotifications';
 import RecruiterChangePassword from '../pages/candidate/ChangePassword';
 
+// Admin Pages
+import AdminDashboard from '../pages/admin/AdminDashboard';
+import AdminUsers from '../pages/admin/AdminUsers';
+import AdminCompanies from '../pages/admin/AdminCompanies';
+import AdminJobs from '../pages/admin/AdminJobs';
+import AdminReports from '../pages/admin/AdminReports';
+
 const AppRoutes = () => {
   return (
     <Routes>
@@ -77,6 +84,17 @@ const AppRoutes = () => {
           <Route path="/recruiter/interviews" element={<RecruiterInterviews />} />
           <Route path="/recruiter/notifications" element={<RecruiterNotifications />} />
           <Route path="/recruiter/change-password" element={<RecruiterChangePassword />} />
+        </Route>
+      </Route>
+
+      {/* Admin Protected Routes inside DashboardLayout */}
+      <Route element={<ProtectedRoute role="admin" />}>
+        <Route element={<DashboardLayout />}>
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/users" element={<AdminUsers />} />
+          <Route path="/admin/companies" element={<AdminCompanies />} />
+          <Route path="/admin/jobs" element={<AdminJobs />} />
+          <Route path="/admin/reports" element={<AdminReports />} />
         </Route>
       </Route>
 
